@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=dima
+User=dimakor
 WorkingDirectory=/opt/avtosrm
 EnvironmentFile=/opt/avtosrm/.env
 ExecStart=/opt/avtosrm/avtosrm
