@@ -1,0 +1,15 @@
+[Unit]
+Description=AVTOSRM Mock Server
+After=network.target
+
+[Service]
+Type=simple
+User=dima
+WorkingDirectory=/opt/avtosrm
+EnvironmentFile=/opt/avtosrm/.env
+ExecStart=/opt/avtosrm/avtosrm
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
