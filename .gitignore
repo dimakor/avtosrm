@@ -5,6 +5,7 @@ avtosrm.db
 
 # Environment
 .env
+keys.json
 
 # IDE
 .idea/

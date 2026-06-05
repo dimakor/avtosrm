@@ -8,7 +8,7 @@ Mock server for avtodispetcher.ru `/v1/route` API backed by OSRM.
 |---|---|
 | **VPS** | `88.218.66.102`, SSH port `22`, user `dimakor` |
 | **API base URL** | `http://88.218.66.102:4569` |
-| **API key** | `GvgocPui7m6aYCbTq1XfnIN4Lehz09sj` |
+| **API keys** | `GvgocPui7m6aYCbTq1XfnIN4Lehz09sj`, `9km_U7DptDgTSWSY-DmZzPHPs0zqYOSp` |
 | **SSH key** | `~/.ssh/id_ed25519` |
 | **Deploy script** | `.\deploy\deploy.ps1` |
 
@@ -18,7 +18,15 @@ Only coordinates work (latitude,longitude). City names, autocomplete, and geocod
 
 ### `GET /v1/route` — route between points
 
-Auth via `Authorization: Bearer <key>` header or `?key=<key>` query parameter.
+Auth via `Authorization: Bearer <key>` header or `?key=<key>` query parameter. Multiple API keys are supported — configure them in `keys.json`.
+
+Keys in use:
+| Key | Owner |
+|---|---|
+| `GvgocPui7m6aYCbTq1XfnIN4Lehz09sj` | Primary |
+| `9km_U7DptDgTSWSY-DmZzPHPs0zqYOSp` | Secondary |
+
+To add a key, append to the `keys` array in `keys.json`, copy to VPS, and restart the service.
 
 ```
 GET /v1/route?from=54.72845,55.9486&to=55.7821,49.12377
@@ -87,7 +95,7 @@ ssh dimakor@88.218.66.102
 sudo systemctl status avtosrm      # check status
 sudo systemctl restart avtosrm     # restart
 sudo journalctl -u avtosrm -f      # tail logs
-cat /opt/avtosrm/.env              # view config
+cat /opt/avtosrm/keys.json         # view API keys
 ```
 
 ## Code layout
@@ -95,7 +103,8 @@ cat /opt/avtosrm/.env              # view config
 | File | Purpose |
 |---|---|
 | `main.go` | Entry point, wires everything |
-| `config/config.go` | Env var parsing (`API_KEY`, `PORT`, `OSRM_URL`, `CACHE_MAX_ENTRIES`) |
+| `config/config.go` | Loads API keys from `keys.json` (fallback to `API_KEY` env), plus `PORT`, `OSRM_URL`, `CACHE_MAX_ENTRIES` |
+| `keys.json` | List of acceptable API keys (`{"keys": [...]}`) |
 | `handler/route.go` | HTTP handlers — route, cities (501), geocode (501) |
 | `middleware/auth.go` | Bearer + query param auth, skips `/v1/cities` |
 | `middleware/cors.go` | CORS headers |
