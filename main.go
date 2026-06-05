@@ -14,8 +14,8 @@ import (
 func main() {
 	cfg := config.Load()
 
-	if cfg.APIKey == "" {
-		log.Fatal("API_KEY environment variable is required")
+	if len(cfg.APIKeys) == 0 {
+		log.Fatal("no API keys configured (keys.json or API_KEY env)")
 	}
 
 	c, err := cache.New(cfg.CacheDBPath, cfg.CacheMaxEntries)
@@ -30,10 +30,10 @@ func main() {
 	mux := http.NewServeMux()
 	h.Register(mux)
 
-	handler := middleware.CORS()(middleware.Auth(cfg.APIKey)(mux))
+	handler := middleware.CORS()(middleware.Auth(cfg.APIKeys)(mux))
 
 	addr := ":" + cfg.Port
-	log.Printf("avtosrm listening on %s", addr)
+	log.Printf("avtosrm listening on %s (keys: %d)", addr, len(cfg.APIKeys))
 	if err := http.ListenAndServe(addr, handler); err != nil {
 		log.Fatalf("server error: %v", err)
 	}

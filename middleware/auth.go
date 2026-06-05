@@ -11,7 +11,12 @@ type contextKey string
 
 const AuthKey contextKey = "authenticated"
 
-func Auth(apiKey string) func(http.Handler) http.Handler {
+func Auth(apiKeys []string) func(http.Handler) http.Handler {
+	keySet := make(map[string]bool, len(apiKeys))
+	for _, k := range apiKeys {
+		keySet[k] = true
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/v1/cities" {
@@ -22,14 +27,14 @@ func Auth(apiKey string) func(http.Handler) http.Handler {
 			authHeader := r.Header.Get("Authorization")
 			if strings.HasPrefix(authHeader, "Bearer ") {
 				key := strings.TrimPrefix(authHeader, "Bearer ")
-				if key == apiKey {
+				if keySet[key] {
 					ctx := context.WithValue(r.Context(), AuthKey, true)
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
 			}
 
-			if key := r.URL.Query().Get("key"); key == apiKey {
+			if key := r.URL.Query().Get("key"); keySet[key] {
 				ctx := context.WithValue(r.Context(), AuthKey, true)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
